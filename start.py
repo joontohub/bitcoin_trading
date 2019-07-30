@@ -11,14 +11,14 @@ with open("sec.txt") as f:
     bithumb = pybithumb.Bithumb(key, secret)
 
 def get_target_price(ticker):
-    df = pybithumb.get_ohlcv("BTC")
+    df = pybithumb.get_ohlcv("XRP")
     yesterday = df.iloc[-2]
 
     today_open = yesterday['close']
     yesterday_high = yesterday['high']
     yesterday_low = yesterday['low']
     target = today_open + (yesterday_high - yesterday_low) * 0.5
-
+    target = int(target)
 
 
     return target
@@ -26,11 +26,12 @@ def get_target_price(ticker):
 def buy_crypto_currency(ticker):
     # 코인 두번째가 전체 원화 액수임 그래서 그냥 비티씨로 써도 되는거
 
-    krw = bithumb.get_balance("BTC")[2]
-    orderbook = pybithumb.get_orderbook("BTC")
+    krw = bithumb.get_balance("XRP")[2]
+    orderbook = pybithumb.get_orderbook("XRP")
     sell_price = orderbook['asks'][0]['price']
-    unit = krw/float(sell_price)
-    bithumb.buy_market_order("BTC", unit)
+    #int 로 바꿈
+    unit = krw/int(sell_price)
+    bithumb.buy_market_order("XRP", unit)
 
 def sell_crypto_currency(ticker):
     unit = bithumb.get_balance(ticker)[0]
@@ -46,26 +47,34 @@ def get_yesterday_ma5(ticker):
 
 now = datetime.datetime.now()
 mid = datetime.datetime(now.year, now.month, now.day) + datetime.timedelta(1)
+today = now.strftime("%Y-%m-%d %H:%M:%S")
 
-ma5 = get_yesterday_ma5("BTC")
-target_price = get_target_price("BTC")
+ma5 = get_yesterday_ma5("XRP")
+target_price = get_target_price("XRP")
 
 
 while True:
     try:
 
         now = datetime.datetime.now()
-        if mid < now < mid + datetime.delta(seconds=10):
-            target_price = get_target_price("BTC")
+        today = now.strftime("%Y-%m-%d %H:%M:%S")
+        now_price = int(pybithumb.get_current_price("XRP"))
+        target = get_target_price("XRP")
+        print("now activating", today,    "now price:", now_price , "target:" ,target)
+
+        #timedelta로 수정
+        if mid < now < mid + datetime.timedelta(seconds=10):
+            target_price = get_target_price("XRP")
             mid = datetime.datetime(now.year, now.month, now.day) + datetime.timedelta(1)
 
-            ma5 = get_yesterday_ma5("BTC")
-            sell_crypto_currency("BTC")
-
-        current_price = pybithumb.get_current_price("BTC")
+            ma5 = get_yesterday_ma5("XRP")
+            sell_crypto_currency("XRP")
+            print("@@ SELL @@")
+        current_price = pybithumb.get_current_price("XRP")
 
         if (current_price > target_price) and (current_price > ma5):
-            buy_crypto_currency("BTC")
+            buy_crypto_currency("XRP")
+            print("@@ BUY @@")
     except:
         print("@@@@@ error @@@@@ ")
     time.sleep(1)
