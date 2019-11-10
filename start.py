@@ -24,12 +24,12 @@ def get_target_price(ticker):
     return target
 
 def buy_crypto_currency(ticker):
-    # 코인 두번째가 전체 원화 액수임 그래서 그냥 비티씨로 써도 되는거
+   
 
     krw = bithumb.get_balance("XRP")[2]
     orderbook = pybithumb.get_orderbook("XRP")
     sell_price = orderbook['asks'][0]['price']
-    #int 로 바꿈
+   
     unit = krw/int(sell_price)
     bithumb.buy_market_order("XRP", unit)
 
@@ -62,7 +62,7 @@ while True:
         target = get_target_price("XRP")
         print("now activating", today,    "now price:", now_price , "target:" ,target)
 
-        #timedelta로 수정
+    
         if mid < now < mid + datetime.timedelta(seconds=10):
             target_price = get_target_price("XRP")
             mid = datetime.datetime(now.year, now.month, now.day) + datetime.timedelta(1)
